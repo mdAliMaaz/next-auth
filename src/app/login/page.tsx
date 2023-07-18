@@ -1,7 +1,9 @@
 "use client";
 
+import axios from "axios";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [user, setUser] = useState({
@@ -9,9 +11,33 @@ const Login = () => {
     password: "",
   });
 
-  const onLogin = () => {
+  const router = useRouter();
+
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+
+  const [loading, setLoading] = useState(false);
+
+  const onLogin = async () => {
     console.log(user);
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/users/login", user);
+      console.log(response);
+      router.push("/profile");
+    } catch (error: any) {
+      console.log(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (user.email.length > 0 && user.password.length > 0) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   return (
     <div>
@@ -58,7 +84,7 @@ const Login = () => {
                       onClick={onLogin}
                       className='bg-blue-500 text-white rounded-md px-2 py-1'
                     >
-                      signin
+                      {buttonDisabled ? "NoSignin" : "Signin"}
                     </button>
                     <Link className=' underline mx-5 text-sm' href={"/signup"}>
                       Don't have an account ?
